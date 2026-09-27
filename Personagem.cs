@@ -8,6 +8,7 @@ public class Personagem
     public string nome { get; }
     public string tipo { get; }
     protected Queue<string> mensagens;
+    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
     public Personagem(string nome, string tipo = "Homem")
     {
@@ -32,15 +33,23 @@ public class Personagem
         if (mensagens.Count == 0)
             return;
 
-        Console.Write($"{tipo}: ");
-
         string msn = mensagens.Dequeue();
-        foreach (char c in msn)
+
+        await _semaphore.WaitAsync();
+        try
         {
-            Console.Write($"{c}");
-            await Task.Delay(tempoFala);
+            Console.Write($"{tipo}: ");
+            foreach (char c in msn)
+            {
+                Console.Write($"{c}");
+                await Task.Delay(tempoFala);
+            }
+            Console.WriteLine();
         }
-        Console.Write(" ");
+        finally
+        {
+            _semaphore.Release();
+        }
         await Task.Delay(200);
     }
 
@@ -51,7 +60,6 @@ public class Personagem
             Console.Write($"{c}");
             Thread.Sleep(tempo);
         }
-
         Console.Write(" ");
     }
 }   
