@@ -1,0 +1,291 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{titlesec}
+
+\definecolor{multivixred}{RGB}{166,27,37}
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codegray}{RGB}{110,110,110}
+\definecolor{codeblue}{RGB}{0,90,160}
+
+\titleformat{\section}{\large\bfseries\color{multivixred}}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+\lstdefinelanguage{csharp}{
+  morekeywords={class,public,private,protected,static,void,string,int,bool,
+    new,base,this,using,namespace,return,if,else,foreach,in,async,await,Task,
+    readonly,get,set},
+  sensitive=true,
+  morecomment=[l]{//},
+  morestring=[b]"
+}
+
+\lstset{
+  language=csharp,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{codeblue}\bfseries,
+  commentstyle=\color{codegray}\itshape,
+  stringstyle=\color{multivixred},
+  numbers=left,
+  numberstyle=\tiny\color{codegray},
+  frame=single,
+  rulecolor=\color{codegray},
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2,
+  extendedchars=true,
+  literate=
+    {á}{{\'a}}1 {à}{{\`a}}1 {ã}{{\~a}}1 {â}{{\^a}}1
+    {é}{{\'e}}1 {ê}{{\^e}}1
+    {í}{{\'i}}1
+    {ó}{{\'o}}1 {õ}{{\~o}}1 {ô}{{\^o}}1
+    {ú}{{\'u}}1 {ü}{{\"u}}1
+    {ç}{{\c c}}1
+    {Á}{{\'A}}1 {À}{{\`A}}1 {Ã}{{\~A}}1 {Â}{{\^A}}1
+    {É}{{\'E}}1 {Ê}{{\^E}}1
+    {Í}{{\'I}}1
+    {Ó}{{\'O}}1 {Õ}{{\~O}}1 {Ô}{{\^O}}1
+    {Ú}{{\'U}}1 {Ü}{{\"U}}1
+    {Ç}{{\c C}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{Programação Distribuída e Paralela}
+\fancyhead[R]{Trabalho I}
+\fancyfoot[C]{\thepage}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=multivixred,
+  urlcolor=multivixred,
+}
+
+\begin{document}
+
+% ---------- Capa ----------
+\begin{titlepage}
+  \centering
+  \includegraphics[width=0.55\textwidth]{multivix-logo.png}\\[2.5cm]
+
+  {\Large Faculdade Multivix -- Serra/ES}\\[0.3cm]
+  {\large Curso de Engenharia da Computação}\\[2.5cm]
+
+  {\Huge\bfseries Trabalho I}\\[0.4cm]
+  {\Large Programação Distribuída e Paralela}\\[0.4cm]
+  {\large Sistema de diálogo entre personagens de RPG com\\
+   Filas, Tasks e métodos síncronos/assíncronos}\\[3cm]
+
+  \begin{tabular}{ll}
+    \textbf{Integrantes:} & Luiz Fernando Pereira Rojas dos Santos \\
+                           & Tadeu Augusto Vilela da Silva \\[0.3cm]
+    \textbf{Curso:}       & Engenharia da Computação \\
+    \textbf{Turma:}       & 2026.2 \\
+    \textbf{Professor:}   & Jacques Oliveira \\
+    \textbf{Instituição:} & Multivix Serra -- Serra, ES \\
+  \end{tabular}
+
+  \vfill
+  {\large Serra -- ES, \today}
+\end{titlepage}
+
+% ---------- Conteúdo ----------
+
+\section{Objetivo do trabalho}
+
+O trabalho solicitado pelo professor Jacques Oliveira consiste em implementar
+um sistema simples de diálogo entre dois personagens no estilo RPG, de forma
+caractere a caractere, utilizando os seguintes recursos da linguagem C\#:
+
+\begin{itemize}
+  \item \textbf{Filas} (\texttt{Queue<T>}) para armazenar as falas de cada personagem;
+  \item \textbf{Métodos síncronos e assíncronos} para comparar os dois modelos de execução;
+  \item \textbf{Tasks} (\texttt{Task}, \texttt{async}, \texttt{await}) para observar, na
+    prática, o comportamento de operações concorrentes e paralelas e o controle de
+    sincronização entre elas;
+  \item \textbf{Orientação a Objetos} (classe, herança e instância), por se tratar de um
+    exercício também de programação distribuída.
+\end{itemize}
+
+\section{Repositório do código}
+
+O código-fonte completo está publicado, de forma pública, no GitHub:
+
+\begin{center}
+  \url{https://github.com/LuizRojas/trabalho-programacao-paralela}
+\end{center}
+
+O projeto é uma aplicação console em \textbf{.NET} e pode ser executada com:
+
+\begin{lstlisting}[language=bash,numbers=none]
+dotnet run
+\end{lstlisting}
+
+\section{O que foi implementado}
+
+\subsection{Modelagem orientada a objetos}
+
+Foi criada uma classe base \texttt{Personagem}, responsável por tudo o que é comum
+a qualquer personagem do diálogo: nome, tipo, a fila de falas e os métodos de
+``falar'' (síncrono e assíncrono). As classes \texttt{Mago} e \texttt{Elfo} \textbf{herdam}
+de \texttt{Personagem} e, no construtor, apenas enfileiram as falas específicas de
+cada uma. Cada personagem usado no programa (\texttt{Mago("Gandalf")} e
+\texttt{Elfo("Link")}) é uma \textbf{instância} independente dessas classes, com sua
+própria fila de mensagens.
+
+\begin{lstlisting}
+public class Personagem
+{
+    public string nome { get; }
+    public string tipo { get; }
+    protected Queue<string> mensagens;
+    ...
+}
+
+public class Mago : Personagem { ... }  // herança
+public class Elfo : Personagem { ... }  // herança
+\end{lstlisting}
+
+\subsection{Filas (Queue<T>)}
+
+Cada personagem guarda suas falas em uma \texttt{Queue<string>}. A fila garante que
+as mensagens sejam exibidas sempre na ordem em que foram cadastradas
+(\texttt{FIFO -- First In, First Out}), que é exatamente o comportamento esperado
+em um diálogo: a primeira fala cadastrada é a primeira a ser ``dita''.
+
+\subsection{Método síncrono}
+
+O método \texttt{DialogoSync} retira uma fala da fila e a imprime letra a letra de
+forma \textbf{bloqueante}, usando \texttt{Thread.Sleep}. Enquanto uma fala está sendo
+exibida, a aplicação não consegue fazer mais nada -- é a thread principal que fica
+ocupada do início ao fim da fala.
+
+\subsection{Método assíncrono (async/await/Task)}
+
+O método \texttt{DialogoAsync} tem a mesma ideia, mas retorna \texttt{Task} e usa
+\texttt{await Task.Delay(...)} em vez de \texttt{Thread.Sleep}. Isso faz com que a
+espera entre cada caractere \textbf{não bloqueie} a thread: o controle é devolvido
+ao chamador, que pode iniciar outras tasks em paralelo enquanto a atual está
+``aguardando''.
+
+\begin{lstlisting}
+public async Task DialogoAsync(int tempoFala = 80)
+{
+    ...
+    await _semaphore.WaitAsync();
+    try
+    {
+        foreach (char c in msn)
+        {
+            Console.Write($"{c}");
+            await Task.Delay(tempoFala);
+        }
+    }
+    finally
+    {
+        _semaphore.Release();
+    }
+}
+\end{lstlisting}
+
+\subsection{Sincronização com SemaphoreSlim}
+
+No \texttt{Program.cs}, várias chamadas a \texttt{DialogoAsync} são disparadas quase ao
+mesmo tempo e aguardadas com \texttt{Task.WhenAll}, caracterizando execução
+\textbf{concorrente} (várias tasks ``em andamento'' ao mesmo tempo). Se nenhum
+controle fosse feito, os caracteres de falas diferentes poderiam se misturar no
+console (ex.: \texttt{M}, de ``Mago'', intercalado com \texttt{E}, de ``Elfo'').
+
+Para evitar isso, foi usado um \texttt{SemaphoreSlim(1, 1)}, que funciona como um
+cadeado: apenas uma task por vez pode estar dentro da seção que imprime uma fala
+completa. As demais tasks ficam aguardando (\texttt{await \_semaphore.WaitAsync()})
+até a atual liberar o semáforo (\texttt{\_semaphore.Release()}), garantindo que cada
+fala apareça inteira e organizada, mesmo com várias tasks rodando ao mesmo tempo.
+
+\subsection{Disparo em paralelo com Task[] e Task.WhenAll}
+
+\begin{lstlisting}
+Task[] tarefas = {
+    mago.DialogoAsync(600),
+    elfo.DialogoAsync(),
+    mago.DialogoAsync(1000),
+    elfo.DialogoAsync(),
+    mago.DialogoAsync(800),
+    elfo.DialogoAsync()
+};
+
+await Task.WhenAll(tarefas);
+\end{lstlisting}
+
+Todas as tasks são criadas de uma vez (array \texttt{Task[]}) e o programa só
+continua quando todas terminarem (\texttt{Task.WhenAll}), demonstrando o paralelismo
+de forma controlada, em contraste com a execução puramente sequencial do bloco
+síncrono anterior.
+
+\section{Entendimento do grupo}
+
+\subsection{Concorrência vs. paralelismo}
+
+\textbf{Concorrência} é a capacidade de lidar com várias tarefas ``ao mesmo tempo''
+do ponto de vista lógico (elas se alternam, podem estar pausadas aguardando
+algo). \textbf{Paralelismo} é quando essas tarefas realmente executam
+simultaneamente (em múltiplos núcleos). No trabalho, o uso de \texttt{async/await}
+cria concorrência: as tasks de diálogo ficam alternando entre executar um
+pedaço e aguardar (\texttt{Task.Delay}), sem travar a thread principal -- e é o
+\texttt{Task.WhenAll} que efetivamente as executa de forma paralela/concorrente.
+
+\subsection{Por que síncrono bloqueia e assíncrono não}
+
+No método síncrono, \texttt{Thread.Sleep} realmente ``congela'' a thread até o
+tempo passar. No método assíncrono, \texttt{await Task.Delay} devolve o controle
+para quem chamou a task, permitindo que outras tasks avancem enquanto a atual
+está esperando -- por isso é possível disparar os diálogos do \texttt{Mago} e do
+\texttt{Elfo} juntos, sem que um precise esperar o outro terminar por completo.
+
+\subsection{Por que foi necessário um semáforo}
+
+Mesmo com tasks assíncronas, o \texttt{Console} é um recurso compartilhado. Sem
+sincronização, duas tasks poderiam escrever no console ao mesmo tempo e misturar
+os caracteres das falas. O \texttt{SemaphoreSlim} resolve isso garantindo exclusão
+mútua durante a escrita de cada fala, sem bloquear a thread (porque
+\texttt{WaitAsync} também é assíncrono).
+
+\section{Resultado obtido}
+
+A saída abaixo foi gerada executando \texttt{dotnet run} e corresponde ao
+resultado esperado no enunciado:
+
+\begin{lstlisting}[numbers=none,basicstyle=\ttfamily\scriptsize]
+Mago: Quem é você viajante ?...
+Elfo: Sou link do jogo zelda...
+Mago: OK, sou Gandalf do senhor dos anéis...
+Mago: Se diz ser quem é, então diga as palavras secretas comigo...
+Mago: E as portas se abrirão...
+Mago: Anah  Elfo: Milac  Mago: Passi-cii-fiik  Elfo: Teish  Mago: Perim  Elfo: Salaa-saa-aah
+
+***=================================***
+Portas abertas!
+\end{lstlisting}
+
+\section{Conclusão}
+
+O trabalho permitiu observar, na prática, a diferença entre execução síncrona
+(bloqueante) e assíncrona (não bloqueante), além do uso de \texttt{Task} para
+paralelizar o diálogo de dois personagens que, mesmo ``conversando ao mesmo
+tempo'', precisam de sincronização (semáforo) para que a saída no console
+permaneça legível e organizada -- exatamente o comportamento clássico de
+concorrência sobre um recurso compartilhado.
+
+\end{document}

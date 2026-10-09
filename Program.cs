@@ -24,6 +24,7 @@ class Program
         };
 
         await Task.WhenAll(tarefas);
+        Console.WriteLine();
         BarraProgresso.loading();
     }
 }   

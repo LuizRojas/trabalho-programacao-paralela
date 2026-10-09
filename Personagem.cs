@@ -44,7 +44,7 @@ public class Personagem
                 Console.Write($"{c}");
                 await Task.Delay(tempoFala);
             }
-            Console.WriteLine();
+            Console.Write("  ");
         }
         finally
         {
